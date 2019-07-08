@@ -1,0 +1,26 @@
+--cpu=Cortex-M4.fp
+"l3gd20\startup_stm32f429xx.o"
+"l3gd20\main.o"
+"l3gd20\stm32f4xx_it.o"
+"l3gd20\stm32f4xx_hal_msp.o"
+"l3gd20\stm32f4xx_hal_spi.o"
+"l3gd20\stm32f4xx_hal_tim.o"
+"l3gd20\stm32f4xx_hal_tim_ex.o"
+"l3gd20\stm32f4xx_hal_uart.o"
+"l3gd20\stm32f4xx_hal_rcc.o"
+"l3gd20\stm32f4xx_hal_rcc_ex.o"
+"l3gd20\stm32f4xx_hal_flash.o"
+"l3gd20\stm32f4xx_hal_flash_ex.o"
+"l3gd20\stm32f4xx_hal_flash_ramfunc.o"
+"l3gd20\stm32f4xx_hal_gpio.o"
+"l3gd20\stm32f4xx_hal_dma_ex.o"
+"l3gd20\stm32f4xx_hal_dma.o"
+"l3gd20\stm32f4xx_hal_pwr.o"
+"l3gd20\stm32f4xx_hal_pwr_ex.o"
+"l3gd20\stm32f4xx_hal_cortex.o"
+"l3gd20\stm32f4xx_hal.o"
+"l3gd20\system_stm32f4xx.o"
+--library_type=microlib --strict --scatter "l3gd20\l3gd20.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "l3gd20.map" -o l3gd20\l3gd20.axf
