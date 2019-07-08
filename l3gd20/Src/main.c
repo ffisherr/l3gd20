@@ -62,22 +62,32 @@ static void MX_UART4_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+void HyroInit(uint8_t address, uint8_t dataIn, uint8_t data)
+{
+    HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_RESET);
+	HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
+	address = dataIn;
+	HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
+	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_SET);
+}
 
+uint16_t getHyroData(uint8_t address, uint8_t data)
+{
+    uint8_t data_return[2] = {0};
+    uint16_t out = 0;
+   	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_RESET);		
+	HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
+	address = 0x00;
+	HAL_SPI_TransmitReceive(&hspi5, &address, &data_return[0], sizeof(data_return[0]), 0x1000);
+	address = 0x00;
+	HAL_SPI_TransmitReceive(&hspi5, &address, &data_return[1], sizeof(data_return[1]), 0x1000);
+	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_SET);
+    out = data_return[0] | (data_return[1] << 8);
+    return out;
+}
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
-
-uint8_t dataRecieved	= 0;
-uint8_t dataTransmitted	= 0;
-
-float translate(uint16_t result){
-		return result * 0.07;
-}
- 
-float ms(float data){
-	return 0.1F * data;
-}
 
 /* USER CODE END 0 */
 
@@ -89,17 +99,8 @@ float ms(float data){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint8_t address = 0;
 	uint8_t data = 0;
-	uint8_t data_return[2] = {0};
- 
-	uint16_t OUT_X_L = 0;	
-	uint16_t OUT_Y_L = 0;
-	uint16_t OUT_Z_L = 0;
- 
-	float fOUT_X_L;
-	float fOUT_Y_L;
-	float fOUT_Z_L;
+    uint16_t OutData[3] = {0};
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -124,44 +125,11 @@ int main(void)
   MX_UART4_Init();
   /* USER CODE BEGIN 2 */
   uint8_t mag = 0xAA;
-  
-  //****************************************
-  HAL_UART_Transmit(&huart4, &mag, 1, 0x1000);
-  //****************************************
-  
-  uint8_t who_am_i, counter = 0;
-  
   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, 1);
-  HAL_Delay(2000);
-  
-  	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_RESET);
-	address = 0x20;	//00100000 - CTRL_REG_1
-	HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
-	address = 0x0F; //00001111
-	HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_SET);
-	
-  HAL_UART_Transmit(&huart4, &data, 1, 0x1000);
-    
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_RESET);
-	address = 0x8F; //10001111 - WHO_AM_I - READ
-	HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
-	address = 0x00; //00000000
-	HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_SET);
-	
-  HAL_UART_Transmit(&huart4, &data, 1, 0x1000);
-    
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_RESET);
-	address = 0x23; //00100011 - CTRL_REG4 
-	HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
-	address = 0x30;	//00110000
-	HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_SET);
-  
-  HAL_UART_Transmit(&huart4, &data, 1, 0x1000);
-  
-  HAL_Delay(3000);
+  HAL_Delay(1000);
+  HyroInit(0x20, 0xCF, data);
+  HyroInit(0x23, 0x30, data);
+  HAL_Delay(500);
   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, 0);
   
   /* USER CODE END 2 */
@@ -173,70 +141,15 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-        mag = 0xBB;
-      
-  //****************************************
-        HAL_UART_Transmit(&huart4, &mag, 1, 0x1000);
-  //****************************************
-      
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_RESET);
-		address = 0xE8;		
-		HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
-		address = 0x00;
-		HAL_SPI_TransmitReceive(&hspi5, &address, &data_return[0], sizeof(data_return[0]), 0x1000);
-		address = 0x00;
-		HAL_SPI_TransmitReceive(&hspi5, &address, &data_return[1], sizeof(data_return[1]), 0x1000);
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_SET);
-      
-		OUT_X_L = data_return[0] | (data_return[1] << 8);  
-  //****************************************
-        HAL_UART_Transmit(&huart4, (uint8_t*)&OUT_X_L, 2, 0x1000);
-  //****************************************
-		fOUT_X_L = translate(OUT_X_L);
-		fOUT_X_L = ms(fOUT_X_L);	
-        
-
-  
-		//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_RESET);
-		address = 0xEA;		
-		HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
-		address = 0x00;
-		HAL_SPI_TransmitReceive(&hspi5, &address, &data_return[0], sizeof(data_return[0]), 0x1000);
-		address = 0x00;
-		HAL_SPI_TransmitReceive(&hspi5, &address, &data_return[1], sizeof(data_return[1]), 0x1000);
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_SET);
-        
-		OUT_Y_L = data_return[0] | (data_return[1] << 8);
-          //****************************************
-        HAL_UART_Transmit(&huart4, (uint8_t*)&OUT_Y_L, 2, 0x1000);
-  //****************************************
-		fOUT_Y_L = translate(OUT_Y_L);
-		fOUT_Y_L = ms(fOUT_Y_L);
-        
-
-  
-		//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_RESET);
-		address = 0xEC;		
-		HAL_SPI_TransmitReceive(&hspi5, &address, &data, sizeof(data), 0x1000);
-		address = 0x00;
-		HAL_SPI_TransmitReceive(&hspi5, &address, &data_return[0], sizeof(data_return[0]), 0x1000);
-		address = 0x00;
-		HAL_SPI_TransmitReceive(&hspi5, &address, &data_return[1], sizeof(data_return[1]), 0x1000);
-	HAL_GPIO_WritePin(HYRO_CSn_GPIO_Port, HYRO_CSn_Pin, GPIO_PIN_SET);
-		OUT_Z_L = data_return[0] | (data_return[1] << 8);  
-        //****************************************
-        HAL_UART_Transmit(&huart4, (uint8_t*)&OUT_Z_L, 2, 0x1000);
-  //****************************************
-        
-		fOUT_Z_L = translate(OUT_Z_L);
-		fOUT_Z_L = ms(fOUT_Z_L);
-        
-
-        mag = 0xCC;
-        HAL_UART_Transmit(&huart4, &mag, 1, 0x1000);
-        HAL_Delay(100);
+      mag = 0xBB;
+      HAL_UART_Transmit(&huart4, &mag, 1, 0x1000);
+      OutData[0] = getHyroData(0xE8, data);
+      OutData[1] = getHyroData(0xEA, data);
+      OutData[2] = getHyroData(0xEC, data);
+      HAL_UART_Transmit(&huart4, (uint8_t*)&OutData[0], 6, 0x1000);
+      mag = 0xCC;
+      HAL_UART_Transmit(&huart4, &mag, 1, 0x1000);
+      HAL_Delay(100);
   }
   /* USER CODE END 3 */
 

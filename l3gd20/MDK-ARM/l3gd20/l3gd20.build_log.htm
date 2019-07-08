@@ -28,23 +28,19 @@ Project File Date:  07/08/2019
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'l3gd20'
 compiling main.c...
-../Src/main.c(134): warning:  #188-D: enumerated type mixed with another type
+../Src/main.c(128): warning:  #188-D: enumerated type mixed with another type
     HAL_GPIO_WritePin(
 ED1_GPIO_Port, 
 ED1_Pin, 1);
-../Src/main.c(165): warning:  #188-D: enumerated type mixed with another type
+../Src/main.c(133): warning:  #188-D: enumerated type mixed with another type
     HAL_GPIO_WritePin(
 ED1_GPIO_Port, 
 ED1_Pin, 0);
-../Src/main.c(132): warning:  #177-D: variable "who_am_i"  was declared but never referenced
-    uint8_t who_am_i, counter = 0;
-../Src/main.c(132): warning:  #177-D: variable "counter"  was declared but never referenced
-    uint8_t who_am_i, counter = 0;
-../Src/main.c: 4 warnings, 0 errors
+../Src/main.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=7260 RO-data=484 RW-data=16 ZI-data=1176  
+Program Size: Code=6220 RO-data=484 RW-data=16 ZI-data=1176  
 FromELF: creating hex file...
-"l3gd20\l3gd20.axf" - 0 Error(s), 4 Warning(s).
+"l3gd20\l3gd20.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -67,7 +63,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.1.2
-Build Time Elapsed:  00:00:19
+Build Time Elapsed:  00:00:12
 </pre>
 </body>
 </html>
